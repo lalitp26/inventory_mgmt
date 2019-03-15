@@ -1,0 +1,104 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div>
+        <form action="" method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="">
+                <legend>Move Product</legend>
+
+                <div class="form-group">
+                    {{ form.product.label(class="form-control-label") }}
+                    {% if form.product.errors %}
+                        {{ form.product(class="form-control is-invalid") }}
+                        
+                        <div class="invalid-feedback">
+                            {% for error in form.product.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+
+                    {% else %}
+                        {{ form.product(class="form-control") }}
+                    {% endif %}
+                    
+                </div>
+
+                <div class="form-group">
+                        {{ form.from_location.label(class="form-control-label") }}
+                        {% if form.from_location.errors %}
+                            {{ form.from_location(class="form-control is-invalid") }}
+                            
+                            <div class="invalid-feedback">
+                                {% for error in form.from_location.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+    
+                        {% else %}
+                            {{ form.from_location(class="form-control") }}
+                        {% endif %}
+                        
+                    </div>
+
+                    <div class="form-group">
+                            {{ form.available_qty.label(class="form-control-label") }}
+        
+                            {% if form.available_qty.errors %}
+                                {{ form.available_qty(class="form-control is-invalid") }}
+                                
+                                <div class="invalid-feedback">
+                                    {% for error in form.available_qty.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                                
+                            {% else %}
+                                {{ form.available_qty(class="form-control") }}
+                            {% endif %}
+                        </div>
+
+                    <div class="form-group">
+                            {{ form.to_location.label(class="form-control-label") }}
+                            {% if form.to_location.errors %}
+                                {{ form.to_location(class="form-control is-invalid") }}
+                                
+                                <div class="invalid-feedback">
+                                    {% for error in form.to_location.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+        
+                            {% else %}
+                                {{ form.to_location(class="form-control") }}
+                            {% endif %}
+                            
+                        </div>
+
+                <div class="form-group">
+                    {{ form.qty.label(class="form-control-label") }}
+
+                    {% if form.qty.errors %}
+                        {{ form.qty(class="form-control is-invalid") }}
+                        
+                        <div class="invalid-feedback">
+                            {% for error in form.qty.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                        
+                    {% else %}
+                        {{ form.qty(class="form-control") }}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.submit(class = "btn btn-outline-info") }}
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+{% endblock %}

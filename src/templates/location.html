@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div>
+        <form action="" method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="">
+                <legend>Add Location</legend>
+
+                <div class="form-group">
+                    {{ form.location_name.label(class="form-control-label") }}
+                    {% if form.location_name.errors %}
+                        {{ form.location_name(class="form-control is-invalid") }}
+                        
+                        <div class="invalid-feedback">
+                            {% for error in form.location_name.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+
+                    {% else %}
+                        {{ form.location_name(class="form-control") }}
+                    {% endif %}
+                    
+                </div>
+               
+                <div class="form-group">
+                    {{ form.submit(class = "btn btn-outline-info") }}
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+{% endblock %}
