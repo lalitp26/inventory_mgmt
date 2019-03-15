@@ -1,5 +1,18 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-    <h1>Product List</h1>
+    <div>
+            <h1>Product List</h1>
+    </div>
+    <div>
+        <a href="{{ url_for('product') }}">Add product</a>
+    </div>
+
+    <ul>
+        {% for product in list%}
+        <li>
+            {{ product.product_name }}
+        </li>
+        {% endfor %}
+    </ul>
 {% endblock %}

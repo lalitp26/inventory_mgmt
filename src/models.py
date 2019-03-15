@@ -33,7 +33,13 @@ class LocationProduct(db.Model):
 
 class ProductMovement(db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    product = db.Column(db.Integer, db.ForeignKey('product.id'), nullable= False)
-    from_location = db.Column(db.Integer, db.ForeignKey('location.id'), nullable= False)
-    to_location = db.Column(db.Integer, db.ForeignKey('location.id'), nullable= False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable= False)
+    product = db.relationship('Product', backref='product', lazy= True)
+
+    from_location_id = db.Column(db.Integer, db.ForeignKey('location.id'))
+    from_location = db.relationship('Location', backref='from_location', lazy= True)
+    
+    to_location_id = db.Column(db.Integer, db.ForeignKey('location.id'))
+    to_location = db.relationship('Location', backref='to_location', lazy= True)
+    
     qty = db.Column(db.Integer, unique = False, nullable= False)
