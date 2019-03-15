@@ -9,16 +9,10 @@ class ProductForm(FlaskForm):
     qty = IntegerField('Qty', validators=[DataRequired()])
     submit = SubmitField('Save')
 
-    def __reps__(self):
-        return self.product_name, self.qty
-
 
 class LocationForm(FlaskForm):
     location_name = StringField("Location Name", validators=[DataRequired()])
     submit = SubmitField('Save')
-
-    def __reps__(self):
-        return self.location_name
 
 class ProductMovement(FlaskForm):
     product = StringField('Product', validators=[DataRequired()])
@@ -27,7 +21,4 @@ class ProductMovement(FlaskForm):
     available_qty = IntegerField('Available Qty', validators=[DataRequired()])
     qty = IntegerField('Qty', validators=[DataRequired()])
     submit = SubmitField('Save')
-
-    def __reps__(self):
-        return self.product
 
