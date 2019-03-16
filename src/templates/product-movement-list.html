@@ -11,7 +11,7 @@
     <ul>
         {% for pm in list%}
         <li>
-            {{ pm.product }}
+            {{ pm.product.product_name }} | {{ pm.from_location.location_name }} | {{ pm.to_location.location_name }}
         </li>
         {% endfor %}
     </ul>

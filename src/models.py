@@ -23,12 +23,15 @@ class Location(db.Model):
 class LocationProduct(db.Model):
     
     id = db.Column(db.Integer, primary_key = True)
-    location = db.Column(db.Integer, db.ForeignKey('location.id'), nullable= False)
-    product = db.Column(db.Integer, db.ForeignKey('product.id'), nullable= False)
+    location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable= False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable= False)
     qty = db.Column(db.Integer, unique = False, nullable= False)
 
+    product = db.relationship('Product', foreign_keys=[product_id],  backref='location_product_name', lazy= True)
+    locaion = db.relationship('Location', foreign_keys=[location_id],  backref='product_location', lazy= True)
+
     def __repr__(self):
-        return "Location: "+self.location
+        return ' Location: '+  str(self.location_id)
 
 
 class ProductMovement(db.Model):
@@ -37,9 +40,10 @@ class ProductMovement(db.Model):
     product = db.relationship('Product', backref='product', lazy= True)
 
     from_location_id = db.Column(db.Integer, db.ForeignKey('location.id'))
-    from_location = db.relationship('Location', backref='from_location', lazy= True)
+    from_location = db.relationship('Location', foreign_keys=[from_location_id],  backref='from_location', lazy= True)
     
     to_location_id = db.Column(db.Integer, db.ForeignKey('location.id'))
-    to_location = db.relationship('Location', backref='to_location', lazy= True)
+    to_location = db.relationship('Location', foreign_keys=[to_location_id],  backref='to_location', lazy= True)
     
     qty = db.Column(db.Integer, unique = False, nullable= False)
+    

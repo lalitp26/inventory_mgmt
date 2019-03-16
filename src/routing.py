@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for, request
 from forms import ProductForm, LocationForm, ProductMovementForm
 from src import app
-from src.models import db, Product, Location, ProductMovement
+from src.models import db, Product, Location, ProductMovement, LocationProduct
 
 @app.route('/product', methods = ['GET', 'POST'])
 def product():
@@ -14,8 +14,8 @@ def product():
             db.session.commit()
             flash('Product added successfully', 'success')
             return redirect(url_for('product_list'))
-    else:
-        return render_template('product.html', form = form)
+
+    return render_template('product.html', form = form)
 
 @app.route('/product-list',methods = ['GET'])
 def product_list():
@@ -25,8 +25,8 @@ def product_list():
 
         if prod_list:
             return render_template('product-list.html', list = prod_list)
-        else:
-            return render_template('product-list.html', list = [])
+
+    return render_template('product-list.html', list = [])
 
 @app.route('/location', methods = ['GET', 'POST'])
 def location():
@@ -58,17 +58,16 @@ def product_movement():
     locations = getLocations()
 
     form.product.choices  = [(str(product.id), product.product_name) for product in products]
-    form.from_location.choices  = [(str(location.id), location.location_name) for location in locations]
-    form.to_location.choices  = [(str(location.id), location.location_name) for location in locations]
+    form.from_location.choices  = [("0", "---")]+[(str(location.id), location.location_name) for location in locations]
+    form.to_location.choices  = [("0", "---")]+[(str(location.id), location.location_name) for location in locations]
 
     if request.method == "POST":
         if form.validate_on_submit():
-            
-            pm = ProductMovement(product = form.product.data,
-                                from_location = form.product.data,
-                                to_location = form.product.data,
-                                qty = form.product.data)
-
+            pm = ProductMovement(product_id = form.product.data,
+                                from_location_id = form.from_location.data,
+                                to_location_id = form.to_location.data,
+                                qty = form.qty.data)
+            updateLocationProduct(form)
             db.session.add(pm)
             db.session.commit()
             
@@ -92,6 +91,38 @@ def product_movement_list():
 def dashboard():
     return render_template('dashboard.html')
 
+
+def updateLocationProduct(form):
+
+    try:
+        if form.from_location.data > 0:
+
+            location = LocationProduct.query.filter_by(location_id = form.from_location.data).first()
+            print location
+            if location:
+                location.qty -= form.qty.data
+            else:
+                location = LocationProduct(location_id = form.from_location.data,
+                                            product_id = form.product.data, 
+                                            qty = form.qty.data)
+
+            db.session.add(location)
+            db.session.commit()
+
+        if form.to_location.data > 0:
+            location = LocationProduct.query.filter_by(location_id = form.from_location.data).first()
+            if location:
+                location.qty += form.qty.data
+            else:
+                location = LocationProduct(location = form.to_location.data,
+                                            product = form.product.data, 
+                                            qty = form.qty.data)
+            db.session.add(location)
+            db.session.commit()
+
+        # lp = LocationProduct(location = , product, qty)
+    except Exception, e:
+        print e
 
 def getProduct(product_id):
     if product_id:
