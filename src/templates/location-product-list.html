@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div>
+    <h1>Product List</h1>
+</div>
+<div>
+    <a href="{{ url_for('location') }}">Add location</a>
+</div>
+
+<ul>
+    {% for product in list%}
+    <li>
+        {{ product.product.product_name }} | {{ product.locaion.location_name }} | {{product.qty}}
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

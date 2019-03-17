@@ -1,7 +1,9 @@
 from flask import render_template, flash, redirect, url_for, request
-from forms import ProductForm, LocationForm, ProductMovementForm
+from src.forms import ProductForm, LocationForm, ProductMovementForm
 from src import app
 from src.models import db, Product, Location, ProductMovement, LocationProduct
+from sqlalchemy import and_
+
 
 @app.route('/product', methods = ['GET', 'POST'])
 def product():
@@ -86,6 +88,19 @@ def product_movement_list():
     else:
         return render_template('product-movement-list.html', list = [])
 
+@app.route('/location-products',methods = ['GET'])
+def location_product():
+    try:
+        if request.method == 'GET':
+            product_list = LocationProduct.query.all()
+        else:
+            product_list = []
+
+        return render_template('location-product-list.html', list = product_list)
+
+    except Exception:
+        print(Exception)
+        print("Exception occured")
 
 @app.route('/')
 def dashboard():
@@ -93,36 +108,38 @@ def dashboard():
 
 
 def updateLocationProduct(form):
+    
+    if int(form.from_location.data) > 0:
+        
+        location = LocationProduct.query.filter(
+                LocationProduct.location_id == form.from_location.data, LocationProduct.product_id == form.product.data
+            ).first()
 
-    try:
-        if form.from_location.data > 0:
+        if location:
+            location.qty -= form.qty.data
+        else:
+            location = LocationProduct(location_id = form.from_location.data,
+                                        product_id = form.product.data, 
+                                        qty = form.qty.data)
 
-            location = LocationProduct.query.filter_by(location_id = form.from_location.data).first()
-            print location
-            if location:
-                location.qty -= form.qty.data
-            else:
-                location = LocationProduct(location_id = form.from_location.data,
-                                            product_id = form.product.data, 
-                                            qty = form.qty.data)
+        db.session.add(location)
+        db.session.commit()
 
-            db.session.add(location)
-            db.session.commit()
+    if int(form.to_location.data) > 0:
+        location = LocationProduct.query.filter(
+                LocationProduct.location_id == form.to_location.data, LocationProduct.product_id == form.product.data
+            ).first()
 
-        if form.to_location.data > 0:
-            location = LocationProduct.query.filter_by(location_id = form.from_location.data).first()
-            if location:
-                location.qty += form.qty.data
-            else:
-                location = LocationProduct(location = form.to_location.data,
-                                            product = form.product.data, 
-                                            qty = form.qty.data)
-            db.session.add(location)
-            db.session.commit()
+        if location:
+            location.qty += form.qty.data
+        else:
+            location = LocationProduct(location_id = form.to_location.data,
+                                        product_id = form.product.data, 
+                                        qty = form.qty.data)
+        db.session.add(location)
+        db.session.commit()
 
-        # lp = LocationProduct(location = , product, qty)
-    except Exception, e:
-        print e
+    # lp = LocationProduct(location = , product, qty)
 
 def getProduct(product_id):
     if product_id:
