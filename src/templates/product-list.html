@@ -11,7 +11,7 @@
     <ul>
         {% for product in list%}
         <li>
-            {{ product.product_name }}
+            {{ product.product_name }} | <a href="/product/{{ product.id }}">Edit</a>
         </li>
         {% endfor %}
     </ul>

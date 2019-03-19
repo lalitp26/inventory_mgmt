@@ -5,10 +5,13 @@ from src.models import db, Product, Location, ProductMovement, LocationProduct
 from sqlalchemy import and_
 
 
+@app.route('/product/<int:product_id>', methods = ['GET', 'POST'])
 @app.route('/product', methods = ['GET', 'POST'])
-def product():
+def product(product_id = 0):
     form  = ProductForm()
-    if request.method == "POST":
+    method = 'POST'
+
+    if request.method == "POST" and not product_id:
         if form.validate_on_submit():
 
             prod = Product(product_name = form.product_name.data,  qty= form.qty.data)
@@ -16,8 +19,18 @@ def product():
             db.session.commit()
             flash('Product added successfully', 'success')
             return redirect(url_for('product_list'))
+    
+    elif request.method == 'GET' and product_id > 0:
+        product = getProduct(1)
+        if product:
+            form.product_name.data  = product.product_name
+            form.qty.data  = product.qty
 
-    return render_template('product.html', form = form)
+    elif request.method == 'POST' and product_id > 0:
+        product = Product(product_name = form.product_name.data,  qty= form.qty.data)
+        print(product)
+
+    return render_template('product.html', form = form, method= method)
 
 @app.route('/product-list',methods = ['GET'])
 def product_list():
@@ -30,16 +43,27 @@ def product_list():
 
     return render_template('product-list.html', list = [])
 
+@app.route('/location/<int:location_id>', methods = ['GET', 'POST'])
 @app.route('/location', methods = ['GET', 'POST'])
-def location():
+def location(location_id = 0):
     form  = LocationForm()
-    if request.method == "POST":
+    if request.method == "POST" and not location_id:
         if form.validate_on_submit():
             loc = Location(location_name = form.location_name.data)
             db.session.add(loc)
             db.session.commit()
             flash('Loation added successfully', 'success')
             return redirect(url_for('location_list'))
+
+    elif request.method == "GET" and location_id > 0:
+        location = getLocation(location_id)
+        if location:
+            form.location_name.data = location.location_name
+            
+    elif request.method == 'POST' and location_id > 0:
+        location = Location(location_name = form.location_name.data)
+        print(location)
+
     return render_template('location.html', form = form)
     
 @app.route('/location-list',methods = ['GET'])
@@ -154,6 +178,14 @@ def getProduct(product_id):
 
         if product:
             return product
+        else:
+            return None
+
+def getLocation(location_id):
+    if location_id:
+        location = Location.query.get(location_id)
+        if location:
+            return location
         else:
             return None
 
