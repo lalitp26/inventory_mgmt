@@ -5,14 +5,43 @@
             <h1>Product Movement List</h1>
     </div>
     <div>
-        <a href="{{ url_for('product_movement') }}">Move product</a>
+        <a class="btn btn-sm btn-primary" href="{{ url_for('product_movement') }}">Move product</a>
     </div>
+<hr>
 
-    <ul>
-        {% for pm in list%}
-        <li>
-            {{ pm.product.product_name }} | {{ pm.from_location.location_name }} | {{ pm.to_location.location_name }} | {{ pm.qty }} | <a href="/product-movement/{{ pm.id }}">Edit</a> | <a href="/product-movement/delete/{{ pm.id }}">Delete</a> 
-        </li>
-        {% endfor %}
-    </ul>
+    <table class="table table-striped">
+    <tr>
+        <th>Sr no</th>
+        <th>Name</th>
+        <th>From Location</th>
+        <th>To Location</th>
+        <th>Qty</th>
+        <th>Action</th>
+    </tr>
+    
+    {% for pm in list%}
+    <tr>
+        <td>
+            {{ loop.index }}
+        </td>
+        <td width="">
+            {{ pm.product.product_name }}
+        </td>
+        <td>
+                {{ pm.from_location.location_name }}
+        </td>
+        <td>
+                {{ pm.to_location.location_name }}
+        </td>
+        <td>
+                {{ pm.qty }}
+        </td>
+        <td>
+                <a href="/product-movement/{{ pm.id }}">Edit</a> | <a href="/product-movement/delete/{{ pm.id }}">Delete</a> 
+        </td>
+    </tr>
+    {% endfor %}
+    
+</table>
+
 {% endblock %}
