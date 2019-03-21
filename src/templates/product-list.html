@@ -11,7 +11,7 @@
     <ul>
         {% for product in list%}
         <li>
-            {{ product.product_name }} | {{ product.qty }} | <a href="/product/{{ product.id }}">Edit</a>
+            {{ product.product_name }} | {{ product.qty }} | <a href="/product/{{ product.id }}">Edit</a> | <a href="/product/delete/{{ product.id }}">Delete</a>
         </li>
         {% endfor %}
     </ul>

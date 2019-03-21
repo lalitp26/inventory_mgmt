@@ -7,6 +7,7 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     product_name = db.Column(db.String(100), unique = True, nullable= False)
     qty = db.Column(db.Integer, unique = False, nullable= False)
+    # is_active = db.Column(db.Integer, unique = False, nullable= False)
 
     def __repr__(self):
         return 'Product: '+str(self.product_name)+' qty: '+  str(self.qty)
@@ -16,6 +17,7 @@ class Location(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     location_name = db.Column(db.String(100), unique = True, nullable= False)
     products = db.relationship('LocationProduct', backref='products', lazy= True)
+    # is_active = db.Column(db.Integer, unique = False, nullable= False)
 
     def __repr__(self):
         return 'Location: '+self.location_name

@@ -2,8 +2,6 @@ from flask import render_template, flash, redirect, url_for, request
 from src.forms import ProductForm, LocationForm, ProductMovementForm
 from src import app
 from src.models import db, Product, Location, ProductMovement, LocationProduct
-from sqlalchemy import and_
-
 
 @app.route('/product/<int:product_id>', methods = ['GET', 'POST'])
 @app.route('/product', methods = ['GET', 'POST'])
@@ -35,6 +33,24 @@ def product(product_id = 0):
         flash('Product updated successfully', 'success')
 
     return render_template('product.html', form = form, method= method)
+
+@app.route('/product/delete/<int:product_id>')
+def delete_product(product_id = 0):
+    if product_id > 0:
+        prod_location = LocationProduct.query.filter_by(product_id = product_id).all()
+        for ploc in prod_location:
+            db.session.delete(ploc)
+            
+        prod_movement = ProductMovement.query.filter_by(product_id = product_id).all()
+        for pmov in prod_movement:
+            db.session.delete(pmov)
+
+        product = Product.query.filter_by(id = product_id).first()
+        
+        db.session.delete(product)
+        db.session.commit()
+
+    return redirect(url_for('product_list'))
 
 @app.route('/product-list',methods = ['GET'])
 def product_list():
@@ -83,6 +99,27 @@ def location_list():
 
     return render_template('location-list.html', list  = locations)
 
+@app.route('/location/delete/<int:location_id>')
+def delete_location(location_id = 0):
+    if location_id > 0:
+        prod_location = LocationProduct.query.filter_by(location_id = location_id).all()
+        for ploc in prod_location:
+            db.session.delete(ploc)
+            
+        from_movement = ProductMovement.query.filter_by(from_location_id = location_id).all()
+        for pmov in from_movement:
+            db.session.delete(pmov)
+        
+        to_movement = ProductMovement.query.filter_by(from_location_id = location_id).all()
+        for pmov in to_movement:
+            db.session.delete(pmov)
+
+        location = Location.query.filter_by(id = location_id).first()
+        
+        db.session.delete(location)
+        db.session.commit()
+
+    return redirect(url_for('location_list'))
 
 @app.route('/product-movement/<int:movement_id>', methods = ['GET', 'POST'])
 @app.route('/product-movement', methods = ['GET', 'POST'])
@@ -157,6 +194,16 @@ def product_movement_list():
         return render_template('product-movement-list.html', list = pm_list)
     else:
         return render_template('product-movement-list.html', list = [])
+
+@app.route('/product-movement/delete/<int:movement_id>')
+def delete_movement(movement_id = 0):
+    if movement_id > 0:
+        product_movement = getProductMovement(movement_id)
+        db.session.delete(product_movement)
+        db.session.commit()
+    return redirect(url_for('product_movement_list'))
+
+
 
 @app.route('/location-products',methods = ['GET'])
 def location_product():
