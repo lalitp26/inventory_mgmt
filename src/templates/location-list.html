@@ -11,7 +11,7 @@
 <ul>
     {% for location in list%}
     <li>
-        {{ location.location_name }}
+        {{ location.location_name }} | <a href="/location/{{ location.id }}">Edit</a>
     </li>
     {% endfor %}
 </ul>
