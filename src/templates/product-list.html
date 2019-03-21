@@ -5,14 +5,34 @@
             <h1>Product List</h1>
     </div>
     <div>
-        <a href="{{ url_for('product') }}">Add product</a>
+        <a class="btn btn-sm btn-primary" href="{{ url_for('product') }}">Add product</a>
     </div>
+    <hr>
+    <table class="table table-striped">
+    <tr>
+        <th>Sr no</th>
+        <th>Name</th>
+        <th>Qty</th>
+        <th>Action</th>
+    </tr>
+    
+    {% for product in list%}
+    <tr>
+        <td>
+            {{ loop.index }}
+        </td>
+        <td width="60%">
+            {{ product.product_name }}
+        </td>
+        <td>
+                {{ product.qty }}
+        </td>
+        <td>
+                <a href="/product/{{ product.id }}">Edit</a> | <a href="/product/delete/{{ product.id }}">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+    
+</table>
 
-    <ul>
-        {% for product in list%}
-        <li>
-            {{ product.product_name }} | {{ product.qty }} | <a href="/product/{{ product.id }}">Edit</a> | <a href="/product/delete/{{ product.id }}">Delete</a>
-        </li>
-        {% endfor %}
-    </ul>
 {% endblock %}

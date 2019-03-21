@@ -4,15 +4,32 @@
 <div>
     <h1>Product List</h1>
 </div>
-<div>
-    <a href="{{ url_for('location') }}">Add location</a>
-</div>
 
-<ul>
+<hr>
+<table class="table table-striped">
+    <tr>
+        <th>Sr no</th>
+        <th>Name</th>
+        <th>Location</th>
+        <th>Qty</th>
+    </tr>
+    
     {% for product in list%}
-    <li>
-        {{ product.product.product_name }} | {{ product.locaion.location_name }} | {{product.qty}}
-    </li>
+    <tr>
+        <td>
+            {{ loop.index }}
+        </td>
+        <td width="60%">
+                {{ product.product.product_name }}
+        </td>
+        <td>
+                {{ product.locaion.location_name }}
+        </td>
+        <td>
+                {{product.qty}}
+        </td>
+    </tr>
     {% endfor %}
-</ul>
+    
+</table>
 {% endblock %}

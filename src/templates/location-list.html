@@ -5,14 +5,31 @@
     <h1>Locations List</h1>
 </div>
 <div>
-    <a href="{{ url_for('location') }}">Add location</a>
+    <a class="btn btn-sm btn-primary" href="{{ url_for('location') }}">Add location</a>
 </div>
-
-<ul>
+<hr>
+<table class="table table-striped">
+    <tr>
+        <th>Sr no</th>
+        <th>Name</th>
+        <th>Action</th>
+    </tr>
+    
     {% for location in list%}
-    <li>
-        {{ location.location_name }} | <a href="/location/{{ location.id }}">Edit</a> | <a href="/location/delete/{{ location.id }}">Delete</a>
-    </li>
+    <tr>
+        <td>
+            {{ loop.index }}
+        </td>
+        <td width="80%">
+            {{ location.location_name }}
+        </td>
+        <td>
+            <a href="/location/{{ location.id }}">Edit</a> | <a href="/location/delete/{{ location.id }}">Delete</a>
+        </td>
+    </tr>
     {% endfor %}
-</ul>
+    
+</table>
+
+    
 {% endblock %}
