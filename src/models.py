@@ -46,4 +46,7 @@ class ProductMovement(db.Model):
     to_location = db.relationship('Location', foreign_keys=[to_location_id],  backref='to_location', lazy= True)
     
     qty = db.Column(db.Integer, unique = False, nullable= False)
+
+    def __repr__(self):
+        return (f'Product: {self.product.product_name}')
     

@@ -27,8 +27,12 @@ def product(product_id = 0):
             form.qty.data  = product.qty
 
     elif request.method == 'POST' and product_id > 0:
-        product = Product(product_name = form.product_name.data,  qty= form.qty.data)
-        print(product)
+        product = getProduct(product_id)
+
+        product.product_name = form.product_name.data
+        product.qty= form.qty.data
+        db.session.commit()
+        flash('Product updated successfully', 'success')
 
     return render_template('product.html', form = form, method= method)
 
@@ -61,8 +65,12 @@ def location(location_id = 0):
             form.location_name.data = location.location_name
             
     elif request.method == 'POST' and location_id > 0:
-        location = Location(location_name = form.location_name.data)
-        print(location)
+        location = getLocation(location_id)
+        
+        location.location_name = form.location_name.data
+        db.session.commit()
+        
+        flash('Loation updated successfully', 'success')
 
     return render_template('location.html', form = form)
     
@@ -76,8 +84,9 @@ def location_list():
     return render_template('location-list.html', list  = locations)
 
 
+@app.route('/product-movement/<int:movement_id>', methods = ['GET', 'POST'])
 @app.route('/product-movement', methods = ['GET', 'POST'])
-def product_movement():
+def product_movement(movement_id = 0):
     form  = ProductMovementForm()
     
     products = getProducts()
@@ -87,13 +96,21 @@ def product_movement():
     form.from_location.choices  = [("0", "---")]+[(str(location.id), location.location_name) for location in locations]
     form.to_location.choices  = [("0", "---")]+[(str(location.id), location.location_name) for location in locations]
 
-    if request.method == "POST":
+    if request.method == "POST" and not movement_id:
         if form.validate_on_submit():
-            pm = ProductMovement(product_id = form.product.data,
-                                from_location_id = form.from_location.data,
-                                to_location_id = form.to_location.data,
+            product_id = form.product.data
+            from_location  = form.from_location.data
+            to_location = form.to_location.data
+
+            pm = ProductMovement(product_id = product_id,
+                                from_location_id = from_location,
+                                to_location_id = to_location,
                                 qty = form.qty.data)
+
+            # movement_status = move_from_to_location(from_location, to_location, product_id, form.qty.data)
+
             status =  updateLocationProduct(form)
+
             if status:
                 db.session.add(pm)
                 db.session.commit()
@@ -102,10 +119,36 @@ def product_movement():
                 return redirect(url_for('product_movement_list'))
             else:
                 flash('Failed to moved product', 'danger')
+    elif request.method == 'GET' and movement_id > 0:
+
+        product_movement = getProductMovement(movement_id)
+
+        if product_movement:
+            form.product.default = product_movement.product_id
+            form.from_location.default = product_movement.from_location_id
+            form.to_location.default = product_movement.to_location_id
+            form.process()
+            form.qty.data = product_movement.qty
+            
+    
+    elif request.method == 'POST' and movement_id > 0:
+        product_movement = getProductMovement(movement_id)
+
+        product_movement.from_location_id = form.from_location.data
+        product_movement.to_location_id = form.to_location.data
+        product_movement.qty = form.qty.data
+
+        # status =  move_from_to_location(int(product_movement.from_location_id), int(product_movement.to_location_id), int(product_movement.product_id), int(form.qty.data)) 
+        status =  updateLocationProduct(form)
+
+        if status:
+            db.session.commit()
+            flash('Product movement updated successfully', 'success')
+            return redirect(url_for('product_movement_list'))
         else:
-            return render_template('move_product.html', form = form)
-    else:
-        return render_template('move_product.html', form = form)
+            flash('Failed to update product movement', 'danger')
+    
+    return render_template('move_product.html', form = form)
 
 @app.route('/product-movement-list',methods = ['GET'])
 def product_movement_list():
@@ -135,42 +178,119 @@ def dashboard():
 
 
 def updateLocationProduct(form):
-    try:
-    
-        if int(form.from_location.data) > 0:
-            
-            location = LocationProduct.query.filter(
-                    LocationProduct.location_id == form.from_location.data, LocationProduct.product_id == form.product.data
-                ).first()
+    # try:
+    product_id = form.product.data
+    product = Product.query.get(product_id)
 
-            if location:
-                location.qty -= form.qty.data
-            else:
-                location = LocationProduct(location_id = form.from_location.data,
-                                            product_id = form.product.data, 
-                                            qty = form.qty.data)
+    if int(form.from_location.data) > 0 and int(form.to_location.data) > 0:
+        from_product = getLocationProduct(int(form.from_location.data), product_id)
+        to_product = getLocationProduct(int(form.to_location.data), product_id)
 
-            db.session.add(location)
+        if from_product and to_product:
+            from_product.qty -= form.qty.data
+            to_product.qty += form.qty.data
             db.session.commit()
+        else:
+            from_loc = LocationProduct(location_id = form.from_location.data,
+                                        product_id = form.product.data, 
+                                        qty = form.qty.data)
 
-        if int(form.to_location.data) > 0:
-            location = LocationProduct.query.filter(
-                    LocationProduct.location_id == form.to_location.data, LocationProduct.product_id == form.product.data
-                ).first()
-
-            if location:
-                location.qty += form.qty.data
-            else:
-                location = LocationProduct(location_id = form.to_location.data,
-                                            product_id = form.product.data, 
-                                            qty = form.qty.data)
-            db.session.add(location)
+            to_loc = LocationProduct(location_id = form.to_location.data,
+                                        product_id = form.product.data, 
+                                        qty = form.qty.data)
+            db.session.add([from_loc, to_loc])
             db.session.commit()
         
-        return True
-    except Exception as e:
-        print(str(e))
-        return False
+
+    elif int(form.from_location.data) > 0 and int(form.to_location.data) <= 0:
+        
+        location = LocationProduct.query.filter(
+                LocationProduct.location_id == form.from_location.data, LocationProduct.product_id == form.product.data
+            ).first()
+
+        if location:
+            location.qty -= form.qty.data
+            db.session.commit()
+        else:
+            location = LocationProduct(location_id = form.from_location.data,
+                                        product_id = form.product.data, 
+                                        qty = form.qty.data)
+
+            
+        product = getProduct(form.product.data)
+        if product:
+            product.qty += form.qty.data
+            db.session.add(location)
+            db.session.commit()
+
+    elif int(form.to_location.data) > 0 and int(form.from_location.data) <= 0:
+        location = LocationProduct.query.filter(
+                LocationProduct.location_id == form.to_location.data, LocationProduct.product_id == form.product.data
+            ).first()
+
+        if location:
+            location.qty += form.qty.data
+            db.session.commit()
+        else:
+            location = LocationProduct(location_id = form.to_location.data,
+                                        product_id = form.product.data, 
+                                        qty = form.qty.data)
+            db.session.add(location)
+
+        product = getProduct(form.product.data)
+        
+        if product:
+            product.qty -= form.qty.data
+            db.session.commit()
+    
+    return True
+    # except Exception as e:
+    #     print(str(e))
+    #     return False
+
+def move_from_to_location(from_location = 0, to_location = 0, product_id = 0, qty = 0):
+    if int(from_location) > 0 and int(to_location) > 0:
+        from_product = getLocationProduct(from_location, product_id)
+
+        to_product = getLocationProduct(from_location, product_id)
+
+        if from_product and to_product:
+            if from_product.qty >= to_product.qty:  
+                from_product.qty -= qty
+                to_product.qty += qty
+            else:
+                flash("Required quantity not available", 'danger')
+                return False
+        else:
+            return False
+
+    elif int(from_location) <= 0 and int(to_location) > 0:
+        to_product = getLocationProduct(from_location, product_id)
+
+        if to_product:
+            product = getProduct(product_id)
+            if product.qty > to_product.qty: 
+                to_product.qty += qty
+            else:
+                flash('Required quantity not available', 'danger')
+                return False
+        else:
+            return False
+
+    elif int(from_location) > 0 and int(to_location) <= 0:
+        from_product = getLocationProduct(from_location, product_id)
+
+        if from_product:
+            if from_product.qty >= qty:
+                from_product.qty -= qty
+            else:
+                flash('Required quantity not available', 'danger')
+                return False
+        else:
+            return False
+
+    db.session.commit()
+    return True
 
 def getProduct(product_id):
     if product_id:
@@ -188,6 +308,28 @@ def getLocation(location_id):
             return location
         else:
             return None
+
+def getLocationProduct(location_d = 0, product_id = 0):
+    if location_d > 0:
+        product = LocationProduct.query.filter(LocationProduct.location_id == location_d,
+                                                LocationProduct.product_id == product_id).first()
+        if product: 
+            return product 
+        else: 
+            return None
+    else:
+        return None
+
+def getProductMovement(movement_id):
+    if movement_id > 0:
+        movement = ProductMovement.query.get(movement_id)
+
+        if movement:
+            return movement
+        else:
+            return None
+    else:
+        return None
 
 def getProducts():
     return Product.query.all()

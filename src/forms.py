@@ -30,7 +30,7 @@ class ProductMovementForm(FlaskForm):
     product = SelectField('Product', validators=[DataRequired()], id='select_product')
     from_location = SelectField('From', id='select_from_location')
     to_location = SelectField('To', id='select_to_location')
-    available_qty = IntegerField('Available Qty', validators=[DataRequired()])
+    # available_qty = IntegerField('Available Qty', validators=[DataRequired()])
     qty = IntegerField('Qty', validators=[DataRequired()])
     submit = SubmitField('Save')
 
